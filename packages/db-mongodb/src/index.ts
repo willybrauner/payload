@@ -1,6 +1,6 @@
 import type { TransactionOptions } from 'mongodb'
 import type { MongoMemoryReplSet } from 'mongodb-memory-server'
-import type { ClientSession, ConnectOptions, Connection } from 'mongoose'
+import type { ClientSession, ConnectOptions, Connection, SchemaOptions } from 'mongoose'
 import type { BaseDatabaseAdapter, DatabaseAdapterObj, Payload } from 'payload'
 
 import fs from 'fs'
@@ -42,6 +42,15 @@ export type { MigrateDownArgs, MigrateUpArgs } from './types.js'
 export interface Args {
   /** Set to false to disable auto-pluralization of collection names, Defaults to true */
   autoPluralization?: boolean
+  /** Define Mongoose options on a collection-by-collection basis.
+   */
+  collections?: {
+    [slug: string]: {
+      /** Define Mongoose schema options for a given collection.
+       */
+      schemaOptions?: SchemaOptions
+    }
+  }
   /** Extra configuration options */
   connectOptions?: {
     /** Set false to disable $facet aggregation in non-supporting databases, Defaults to true */
@@ -49,23 +58,40 @@ export interface Args {
   } & ConnectOptions
   /** Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false */
   disableIndexHints?: boolean
+  /** Define Mongoose options for the globals collection.
+   */
+  globals?: {
+    schemaOptions?: SchemaOptions
+  }
   migrationDir?: string
   /**
    * typed as any to avoid dependency
    */
   mongoMemoryServer?: MongoMemoryReplSet
+  /** Define default Mongoose schema options for all schemas created.
+   */
+  schemaOptions?: SchemaOptions
   transactionOptions?: TransactionOptions | false
   /** The URL to connect to MongoDB or false to start payload and prevent connecting */
   url: false | string
 }
 
 export type MongooseAdapter = {
+  collectionOptions: {
+    [slug: string]: {
+      schemaOptions?: SchemaOptions
+    }
+  }
   collections: {
     [slug: string]: CollectionModel
   }
   connection: Connection
   globals: GlobalModel
+  globalsOptions: {
+    schemaOptions?: SchemaOptions
+  }
   mongoMemoryServer: MongoMemoryReplSet
+  schemaOptions?: SchemaOptions
   sessions: Record<number | string, ClientSession>
   versions: {
     [slug: string]: CollectionModel
@@ -76,13 +102,22 @@ export type MongooseAdapter = {
 declare module 'payload' {
   export interface DatabaseAdapter
     extends Omit<BaseDatabaseAdapter, 'sessions'>,
-      Omit<Args, 'migrationDir'> {
+      Omit<Args, 'collections' | 'globals' | 'migrationDir'> {
+    collectionOptions: {
+      [slug: string]: {
+        schemaOptions?: SchemaOptions
+      }
+    }
     collections: {
       [slug: string]: CollectionModel
     }
     connection: Connection
     globals: GlobalModel
+    globalsOptions: {
+      schemaOptions?: SchemaOptions
+    }
     mongoMemoryServer: MongoMemoryReplSet
+    schemaOptions?: SchemaOptions
     sessions: Record<number | string, ClientSession>
     transactionOptions: TransactionOptions
     versions: {
@@ -93,10 +128,13 @@ declare module 'payload' {
 
 export function mongooseAdapter({
   autoPluralization = true,
+  collections,
   connectOptions,
   disableIndexHints = false,
+  globals,
   migrationDir: migrationDirArg,
   mongoMemoryServer,
+  schemaOptions,
   transactionOptions = {},
   url,
 }: Args): DatabaseAdapterObj {
@@ -109,17 +147,21 @@ export function mongooseAdapter({
 
       // Mongoose-specific
       autoPluralization,
+      collectionOptions: collections || {},
       collections: {},
       connectOptions: connectOptions || {},
       connection: undefined,
       count,
       disableIndexHints,
       globals: undefined,
+      globalsOptions: globals || {},
       mongoMemoryServer,
+      schemaOptions: schemaOptions || {},
       sessions: {},
       transactionOptions: transactionOptions === false ? undefined : transactionOptions,
       url,
       versions: {},
+
       // DatabaseAdapter
       beginTransaction: transactionOptions ? beginTransaction : undefined,
       commitTransaction,
