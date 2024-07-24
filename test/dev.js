@@ -19,10 +19,10 @@ const {
   ...args
 } = minimist(process.argv.slice(2))
 
-if (!fs.existsSync(path.resolve(dirname, testSuiteArg))) {
-  console.log(chalk.red(`ERROR: The test folder "${testSuiteArg}" does not exist`))
-  process.exit(0)
-}
+// if (!fs.existsSync(path.resolve(dirname, testSuiteArg))) {
+//   console.log(chalk.red(`ERROR: The test folder "${testSuiteArg}" does not exist`))
+//   process.exit(0)
+// }
 
 if (args.turbo === true) {
   process.env.TURBOPACK = '1'

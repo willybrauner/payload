@@ -6,13 +6,26 @@ export const postsSlug = 'posts'
 
 export const PostsCollection: CollectionConfig = {
   slug: postsSlug,
-  admin: {
-    useAsTitle: 'text',
-  },
   fields: [
     {
       name: 'text',
       type: 'text',
+    },
+    {
+      name: 'assets',
+      type: 'array',
+      labels: {
+        singular: 'Asset',
+        plural: 'Assets',
+      },
+      fields: [
+        {
+          name: 'image',
+          type: 'upload',
+          relationTo: 'media',
+          required: true,
+        },
+      ],
     },
     {
       name: 'richText',
@@ -40,19 +53,6 @@ export const PostsCollection: CollectionConfig = {
         ],
       }),
     },
-    // {
-    //   type: 'row',
-    //   fields: [],
-    // },
-    // {
-    //   name: 'associatedMedia',
-    //   type: 'upload',
-    //   access: {
-    //     create: () => true,
-    //     update: () => false,
-    //   },
-    //   relationTo: mediaSlug,
-    // },
   ],
   versions: {
     drafts: true,

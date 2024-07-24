@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { ListView } from './components/ListView'
+
 export const mediaSlug = 'media'
 
 export const MediaCollection: CollectionConfig = {
@@ -9,6 +11,15 @@ export const MediaCollection: CollectionConfig = {
     read: () => true,
   },
   fields: [],
+  admin: {
+    components: {
+      views: {
+        List: {
+          Component: ListView,
+        },
+      },
+    },
+  },
   upload: {
     crop: true,
     focalPoint: true,
