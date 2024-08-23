@@ -100,17 +100,19 @@ export const ListView: React.FC = () => {
   }, [setStepNav, labels, drawerDepth])
 
   const tableColumns = useTableColumns()
-  const itemClicked = (e) => {
+
+  const handleItemClicked = (doc) => {
     const onClick = tableColumns.columns[0].cellProps?.onClick
     if (typeof onClick === 'function') {
-      onClick?.({
+      // we are in "list-drawer" view, push the new route with next/navigation
+      onClick({
         cellData: undefined,
-        collectionSlug: e,
-        rowData: e,
+        collectionSlug: doc,
+        rowData: doc,
       })
     } else {
-      console.log('onClick doesnt exist, push the new route')
-      void router.push(`${collectionSlug}/${e.id}`)
+      // we are in "collection-admin" view, push the new route with next/navigation
+      void router.push(`${collectionSlug}/${doc.id}`)
     }
   }
 
@@ -155,7 +157,7 @@ export const ListView: React.FC = () => {
               <RelationshipProvider>
                 {docs.map((e, i) => (
                   // eslint-disable-next-line jsx-a11y/click-events-have-key-events
-                  <div className={css.item} key={i} onClick={() => itemClicked(e)}>
+                  <div className={css.item} key={i} onClick={() => handleItemClicked(e)}>
                     <div className={css.thumb}>
                       {e.mimeType.startsWith('image') && (
                         <Image
