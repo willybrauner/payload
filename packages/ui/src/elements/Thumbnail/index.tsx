@@ -54,17 +54,19 @@ export const Thumbnail = (props: ThumbnailProps) => {
   return (
     <div className={classNames}>
       {fileExists === undefined && <ShimmerEffect height="100%" />}
-      {fileExists && fileType === 'image' && <img alt={alt} src={src} />}
-      {fileExists && fileType === 'video' && (
-        <video
-          aria-label={alt}
-          autoPlay={false}
-          controls={false}
-          muted={true}
-          playsInline={true}
-          src={src}
-        />
-      )}
+      {fileExists &&
+        (fileType === 'video' ? (
+          <video
+            aria-label={alt}
+            autoPlay={false}
+            controls={false}
+            muted={true}
+            playsInline={true}
+            src={src}
+          />
+        ) : (
+          <img alt={alt} src={src} />
+        ))}
       {fileExists === false && <File />}
     </div>
   )

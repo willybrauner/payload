@@ -262,7 +262,7 @@ describe('uploads', () => {
     await page.goto(customFileNameURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
 
-    // await expect(page.locator('.file-field__upload .thumbnail img')).toBeVisible()
+    await expect(page.locator('.file-field__upload .thumbnail img')).toBeVisible()
 
     await saveDocAndAssert(page)
 
