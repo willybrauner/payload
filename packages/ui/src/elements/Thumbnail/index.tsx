@@ -40,15 +40,13 @@ export const Thumbnail = (props: ThumbnailProps) => {
       video.src = fileSrc
       video.crossOrigin = 'anonymous'
       video.onloadeddata = () => {
-        // Create a canvas to capture the video frame
         const canvas = document.createElement('canvas')
         canvas.width = video.videoWidth
         canvas.height = video.videoHeight
         const ctx = canvas.getContext('2d')
         if (ctx) {
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-          const thumbnail = canvas.toDataURL('image/png')
-          setSrc(thumbnail)
+          setSrc(canvas.toDataURL('image/png'))
           setFileExists(true)
         }
       }
