@@ -28,24 +28,24 @@ export const Thumbnail = (props: ThumbnailProps) => {
   const [fileExists, setFileExists] = React.useState<boolean | undefined>(undefined)
 
   React.useEffect(() => {
-    if (!fileSrc || !fileType) {
+    if (!fileSrc) {
       setFileExists(false)
       return
     }
-    if (fileType === 'image') {
-      const img = new Image()
-      img.src = fileSrc
-      img.onload = () => setFileExists(true)
-      img.onerror = () => setFileExists(false)
-    } else if (fileType === 'video') {
+
+    if (fileType === 'video') {
       const video = document.createElement('video')
       video.src = fileSrc
       video.crossOrigin = 'anonymous'
       video.onloadeddata = () => setFileExists(true)
       video.onerror = () => setFileExists(false)
-    } else {
-      setFileExists(false)
+      return
     }
+
+    const img = new Image()
+    img.src = fileSrc
+    img.onload = () => setFileExists(true)
+    img.onerror = () => setFileExists(false)
   }, [fileSrc, fileType])
 
   const src = `${fileSrc}${imageCacheTag ? `?${imageCacheTag}` : ''}`
