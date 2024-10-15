@@ -26,7 +26,9 @@ export const Thumbnail = (props: ThumbnailProps) => {
   const classNames = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
   const fileType = (mimeType as string)?.split('/')?.[0]
   const [fileExists, setFileExists] = React.useState<boolean | undefined>(undefined)
-
+  const [src, setSrc] = React.useState<null | string>(
+    fileSrc ? `${fileSrc}${imageCacheTag ? `?${imageCacheTag}` : ''}` : null,
+  )
   React.useEffect(() => {
     if (!fileSrc) {
       setFileExists(false)
@@ -37,7 +39,19 @@ export const Thumbnail = (props: ThumbnailProps) => {
       const video = document.createElement('video')
       video.src = fileSrc
       video.crossOrigin = 'anonymous'
-      video.onloadeddata = () => setFileExists(true)
+      video.onloadeddata = () => {
+        // Create a canvas to capture the video frame
+        const canvas = document.createElement('canvas')
+        canvas.width = video.videoWidth
+        canvas.height = video.videoHeight
+        const ctx = canvas.getContext('2d')
+        if (ctx) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+          const thumbnail = canvas.toDataURL('image/png')
+          setSrc(thumbnail)
+          setFileExists(true)
+        }
+      }
       video.onerror = () => setFileExists(false)
       return
     }
@@ -46,27 +60,14 @@ export const Thumbnail = (props: ThumbnailProps) => {
     img.src = fileSrc
     img.onload = () => setFileExists(true)
     img.onerror = () => setFileExists(false)
-  }, [fileSrc, fileType])
+  }, [fileSrc, fileType, imageCacheTag])
 
-  const src = `${fileSrc}${imageCacheTag ? `?${imageCacheTag}` : ''}`
   const alt = props.alt || (filename as string)
 
   return (
     <div className={classNames}>
       {fileExists === undefined && <ShimmerEffect height="100%" />}
-      {fileExists &&
-        (fileType === 'video' ? (
-          <video
-            aria-label={alt}
-            autoPlay={false}
-            controls={false}
-            muted={true}
-            playsInline={true}
-            src={src}
-          />
-        ) : (
-          <img alt={alt} src={src} />
-        ))}
+      {fileExists && <img alt={alt} src={src} />}
       {fileExists === false && <File />}
     </div>
   )
